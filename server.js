@@ -12,7 +12,7 @@ if (!public) {
 }
 
 const ENA = new Gpio(17, {mode: Gpio.OUTPUT});
-const IN1 = new Gpio(24, {mode: Gpio.OUTPUT});
+const IN1 = new Gpio(27, {mode: Gpio.OUTPUT});
 const IN2 = new Gpio(22, {mode: Gpio.OUTPUT});
 const IN3 = new Gpio(23, {mode: Gpio.OUTPUT});
 const IN4 = new Gpio(24, {mode: Gpio.OUTPUT});
@@ -20,9 +20,9 @@ const ENB = new Gpio(18, {mode: Gpio.OUTPUT});
 
 ENA.pwmWrite(0);
 ENB.pwmWrite(0);
-IN1.digitalWrite(0);
+IN1.digitalWrite(1);
 IN2.digitalWrite(0);
-IN3.digitalWrite(0);
+IN3.digitalWrite(1);
 IN4.digitalWrite(0);
 
 app.use(bodyParser.json());
@@ -31,9 +31,23 @@ app.use(express.static(path.resolve(public)));
 
 app.post("/control", (request, response) => {
   if (request.body.name == "LEFT") {
-    ENA.pwmWrite(request.body.value);
+    if (request.body.value < 0 ) {
+      IN1.digitalWrite(0);
+      IN2.digitalWrite(1);
+    } else {
+      IN1.digitalWrite(1);
+      IN2.digitalWrite(0);
+    }
+    ENA.pwmWrite(Math.abs(request.body.value));
   } else if (request.body.name == "RIGHT") {
-    ENB.pwmWrite(request.body.value);
+    if (request.body.value < 0) {
+      IN3.digitalWrite(0);
+      IN4.digitalWrite(1);
+    } else {
+      IN3.digitalWrite(1);
+      IN4.digitalWrite(0);
+    }	  
+    ENB.pwmWrite(Math.abs(request.body.value));
   }
   response.status(200).end();
 });
