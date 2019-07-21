@@ -55,30 +55,31 @@ IN4.digitalWrite(0);
 const tankControl = new WebSocket.Server({ port: 3001 });
 tankControl.on('connection', function connection(ws) {
   ws.on('message', function incoming(data) {
-    if (data.name == "LEFT") {
-      if (data.value < 0 ) {
+    const control = JSON.parse(data);
+    if (control.name == "LEFT") {
+      if (control.value < 0 ) {
         IN1.digitalWrite(0);
         IN2.digitalWrite(1);
       } else {
         IN1.digitalWrite(1);
         IN2.digitalWrite(0);
       }
-      ENA.pwmWrite(Math.abs(data.value));
-    } else if (data.name == "RIGHT") {
-      if (data.value < 0) {
+      ENA.pwmWrite(Math.abs(control.value));
+    } else if (control.name == "RIGHT") {
+      if (control.value < 0) {
         IN3.digitalWrite(0);
         IN4.digitalWrite(1);
       } else {
         IN3.digitalWrite(1);
         IN4.digitalWrite(0);
       }
-      ENB.pwmWrite(Math.abs(data.value));
+      ENB.pwmWrite(Math.abs(control.value));
     }
   });
 });
 
 app.use(express.static(path.resolve(public)));
 
-app.post("/controlSocket", tankControl);
+app.socket("/controlSocket", tankControl);
 
 app.listen(port, () => console.log(`Pi Tank Running!`));
